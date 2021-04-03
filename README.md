@@ -9,3 +9,5 @@ A simple python script to ddos wifi networks
 
 # Make sure you have connected you wifi addapted
 # and you have preinstalled python
+
+# Tool Author: krishpranav | https://www.github.com/krishpranav
