@@ -64,4 +64,51 @@ while True:
 	except:
 		print("Please enter a number that corresponds with the choice available")
 
-#for easy reference we call the selected interface hacknic	
+#for easy reference we call the selected interface hacknic
+hacknic = check_wifi_result[int(wifi_interface_choice)]
+
+#tell the usre we're going to kill the conflicting process
+print("wifi adapter connected!\nNow lets kill conflicting process: ")
+
+kill_confilict_process = subprocess.run(["sudo", "airmon-ng", "check", "kill"])	
+
+print("putting wifi adapter into monitored mode: ")
+put_in_monitored_mode = subprocess.run(["sudo", "airmon-ng", "start", hacknic])
+
+try:
+    while True:
+        # We want to clear the screen before we print the network interfaces.
+        subprocess.call("clear", shell=True)
+        for file_name in os.listdir():
+                # We should only have one csv file as we backup all previous csv files from the folder every time we run the program. 
+                # The following list contains the field names for the csv entries.
+                fieldnames = ['BSSID', 'First_time_seen', 'Last_time_seen', 'channel', 'Speed', 'Privacy', 'Cipher', 'Authentication', 'Power', 'beacons', 'IV', 'LAN_IP', 'ID_length', 'ESSID', 'Key']
+                if ".csv" in file_name:
+                    with open(file_name) as csv_h:
+                        # This will run multiple times and we need to reset the cursor to the beginning of the file.
+                        csv_h.seek(0)
+                        # We use the DictReader method and tell it to take the csv_h contents and then apply the dictionary with the fieldnames we specified above. 
+                        # This creates a list of dictionaries with the keys as specified in the fieldnames.
+                        csv_reader = csv.DictReader(csv_h, fieldnames=fieldnames)
+                        for row in csv_reader:
+                            # We want to exclude the row with BSSID.
+                            if row["BSSID"] == "BSSID":
+                                pass
+                            # We are not interested in the client data.
+                            elif row["BSSID"] == "Station MAC":
+                                break
+                            # Every field where an ESSID is specified will be added to the list.
+                            elif check_for_essid(row["ESSID"], active_wireless_networks):
+                                active_wireless_networks.append(row)
+
+        print("Scanning. Press Ctrl+C when you want to select which wireless network you want to attack.\n")
+        print("No |\tBSSID              |\tChannel|\tESSID                         |")
+        print("___|\t___________________|\t_______|\t______________________________|")
+        for index, item in enumerate(active_wireless_networks):
+            # We're using the print statement with an f-string. 
+            # F-strings are a more intuitive way to include variables when printing strings, 
+            # rather than ugly concatenations.
+            print(f"{index}\t{item['BSSID']}\t{item['channel'].strip()}\t\t{item['ESSID']}")
+        # We make the script sleep for 1 second before loading the updated list.
+        time.sleep(1)
+							
