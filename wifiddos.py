@@ -46,3 +46,22 @@ for file_name in os.listdir():
 
 wlan_pattern = re.compile("^wlan[0-9]+")
 check_wifi_result = wlan_pattern.findall(subprocess.run(["iwconfig"], capture_output=True).stdout.decode())
+
+if len(check_wifi_result) == 0:
+	print("please connect a wifi adapter and try again")
+	exit()
+
+print("the following wifi interface are available: ")
+for index, item in enumerate(check_wifi_result):
+	print(f"{index} - {item}")
+
+# ensure the wifi interface selected is valid. simple menu with interface to select form
+while True:
+	wifi_interface_choice = input("Please select the interface you want to attack >> ")
+	try:
+		if check_wifi_result[int(wifi_interface_choice)]:
+			break
+	except:
+		print("Please enter a number that corresponds with the choice available")
+
+#for easy reference we call the selected interface hacknic	
